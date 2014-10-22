@@ -56,12 +56,16 @@ class Cursor(object):
         self._cursorLock = threading.RLock()
 
     def execute(self, hql):
-        self.hasMoreRows = True
-        query = TExecuteStatementReq(self.session, statement=hql, confOverlay={})
-        res = self.client.ExecuteStatement(query)
-        self.operationHandle = res.operationHandle
-        if res.status.errorCode is not None:
-            raise Pyhs2Exception(res.status.errorCode, res.status.errorMessage)
+      self.hasMoreRows = True
+      self._currentRecordNum = None
+      self._currentBlock = None
+      self._standbyBlock = None
+      self._blockRequestInProgress = False
+      query = TExecuteStatementReq(self.session, statement=hql, confOverlay={})
+      res = self.client.ExecuteStatement(query)
+      self.operationHandle = res.operationHandle
+      if res.status.errorCode is not None:
+        raise Pyhs2Exception(res.status.errorCode, res.status.errorMessage)
         
     def fetch(self):
         rows = []
